@@ -1,4 +1,3 @@
-
 import warnings
 warnings.filterwarnings(action='ignore') 
 import os
@@ -7,7 +6,7 @@ import numpy as np
 import yaml
 import time
 import colorama
-import CodeFunctions as cf
+from CodeFunctions import MessDataExtraction, WriteChemkinFile
 
 colorama.init(autoreset = True)
 
@@ -79,7 +78,7 @@ while True:
 
 MappedKeyword = np.array(MappedKeyword)
 
-Parent_HighP, Parent_rates = cf.MessExtraction.messExtract(filePath, Temps, Pressures, MappedKeyword) 
+Parent_HighP, Parent_rates = MessDataExtraction.messExtract(filePath, Temps, Pressures, MappedKeyword) 
 
 print(colorama.Fore.YELLOW + colorama.Style.BRIGHT + "\nData Extracted for requested pressures and temperatures successfully!\n")
 
@@ -102,6 +101,8 @@ if WeightedRatesUserInp == 'y':
     SubArray = np.repeat(SubArray, Repitition, axis=2)
     Parent_rates = np.concatenate((Parent_rates, SubArray), axis = 2)
     Parent_rates = Parent_rates[:,:,Parent_rates[0][0].argsort()]
+else:
+    WeightStartEndTemps = []
 
 # Tolerance
 
@@ -147,10 +148,7 @@ while True:
         ===========
         """)
         StartTime = time.time()
-        if WeightedRatesUserInp == 'y':
-            cf.WriteChemkinFile(file, RatePlotDict, Index, Pressures, SpeciesIndex, Parent_HighP, Parent_rates, Tolerance, WeightStartEndTemps, Bimolec).WriteWeightedRates()
-        else:
-            cf.WriteChemkinFile(file, RatePlotDict, Index, Pressures, SpeciesIndex, Parent_HighP, Parent_rates, Tolerance, Bimolec=Bimolec).WriteRates()
+        WriteChemkinFile.WriteFile(file, RatePlotDict, Index, Pressures, SpeciesIndex, Parent_HighP, Parent_rates, Tolerance, Bimolec, WeightStartEndTemps)
         EndTime = time.time()
         print(colorama.Back.GREEN + f"\nWrite Time: {EndTime - StartTime} seconds")
         if input(colorama.Fore.GREEN  + colorama.Style.BRIGHT + "\nDo you want to print any more rates? (y/n): ")[0].lower() == 'y':
